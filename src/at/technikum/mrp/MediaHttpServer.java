@@ -148,9 +148,17 @@ public class MediaHttpServer {
                     send(exchange, 200, repository.findAll());
 
                 } else if (method.equals("POST")) {
+
+                    Integer userId = authenticatedUserId(exchange);
+
+                    if (userId == null) {
+                        send(exchange, 401,
+                                Map.of("error", "Authentication required"));
+                        return;
+                    }
+
                     JsonNode body = JSON.readTree(exchange.getRequestBody());
 
-                    int userId = requiredPositiveInt(body, "userId");
                     int mediaId = requiredPositiveInt(body, "mediaId");
                     int stars = requiredPositiveInt(body, "stars");
 
@@ -178,11 +186,22 @@ public class MediaHttpServer {
             int id = Integer.parseInt(path.substring("/ratings/".length()));
 
             if (method.equals("DELETE")) {
-                if (repository.delete(id)) {
+
+                Integer userId = authenticatedUserId(exchange);
+
+                if (userId == null) {
+                    send(exchange, 401,
+                            Map.of("error", "Authentication required"));
+                    return;
+                }
+
+                if (repository.delete(id, userId)) {
                     sendEmpty(exchange, 204);
                 } else {
-                    send(exchange, 404, Map.of("error", "Rating not found"));
+                    send(exchange, 404,
+                            Map.of("error", "Rating not found"));
                 }
+
             } else {
                 methodNotAllowed(exchange, "DELETE");
             }
@@ -256,6 +275,34 @@ public class MediaHttpServer {
         } finally {
             exchange.close();
         }
+    }
+
+    // Gets the user ID from the login token.
+    private static Integer authenticatedUserId(HttpExchange exchange)
+            throws SQLException {
+
+        String authorization =
+                exchange.getRequestHeaders().getFirst("Authorization");
+
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
+            return null;
+        }
+
+        String token = authorization.substring(7).trim();
+
+        String username = activeTokens.get(token);
+
+        if (username == null) {
+            return null;
+        }
+
+        int userId = new UserRepository().findIdByUsername(username);
+
+        if (userId == -1) {
+            return null;
+        }
+
+        return userId;
     }
 
     private static int requiredPositiveInt(JsonNode body, String field) {
