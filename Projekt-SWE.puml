@@ -1,0 +1,80 @@
+@startuml
+
+interface Rateable {
+  + rateInfo(): String
+}
+
+abstract class MediaEntry {
+  - title: String
+  - genre: String
+  {static} - creationCount: int
+
+  + MediaEntry(title: String, genre: String)
+  + getTitle(): String
+  + setTitle(title: String): void
+  + getGenre(): String
+  + setGenre(genre: String): void
+  + getInfo(): String
+  {static} + getCreationCount(): int
+  {abstract} + getType(): String
+}
+
+class Movie {
+  - duration: int
+
+  + Movie(title: String, genre: String, duration: int)
+  + getDuration(): int
+  + getType(): String
+  + rateInfo(): String
+}
+
+class Series {
+  - seasons: int
+
+  + Series(title: String, genre: String, seasons: int)
+  + getSeasons(): int
+  + getType(): String
+  + rateInfo(): String
+}
+
+class User {
+  - username: String
+  - password: String
+
+  + User(username: String, password: String)
+  + getUsername(): String
+  + setUsername(username: String): void
+  + getPassword(): String
+  + setPassword(password: String): void
+  + getInfo(): String
+}
+
+class Rating {
+  - user: User
+  - media: MediaEntry
+  - stars: int
+
+  + Rating(user: User, media: MediaEntry, stars: int)
+  + getUser(): User
+  + getMedia(): MediaEntry
+  + getStars(): int
+  + setStars(stars: int): void
+  + getInfo(): String
+}
+
+class Main {
+  + main(args: String[]): void
+}
+
+Rateable <|.. MediaEntry
+MediaEntry <|-- Movie
+MediaEntry <|-- Series
+Rating --> User
+Rating --> MediaEntry
+Main ..> User
+Main ..> Movie
+Main ..> Series
+Main ..> Rating
+Main ..> Rateable
+
+@enduml
