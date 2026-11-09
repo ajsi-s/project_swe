@@ -29,3 +29,28 @@ FROM (VALUES
     ('Wednesday', 'Mystery', 'Series', NULL, 2)
 ) AS seed(title, genre, media_type, duration, seasons)
 WHERE NOT EXISTS (SELECT 1 FROM media_entries);
+
+
+SELECT * FROM media_entries;
+
+SELECT current_database();
+
+SELECT table_schema, table_name
+FROM information_schema.tables
+WHERE table_name = 'media_entries';
+
+SELECT * FROM media_entries;
+
+SELECT current_database();
+
+SELECT table_name
+FROM information_schema.tables
+WHERE table_schema = 'public';
+
+SELECT * FROM users;
+
+INSERT INTO users (username, password)
+VALUES ('testuser', 'test123');
+
+SELECT id, username, password
+FROM users;
